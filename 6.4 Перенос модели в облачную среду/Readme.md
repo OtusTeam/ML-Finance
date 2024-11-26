@@ -2,7 +2,7 @@
 
 1. Устанавливаем консольную утилиту `yc`
 
-    [Инструкции](https://yandex.cloud/ru/docs/cli/quickstart#install) для Linux, macOS, Windows4
+    [Инструкции](https://yandex.cloud/ru/docs/cli/quickstart#install) для Linux, macOS, Windows
 
 2. Регистрируемся и создаём платёжный аккаунт на [cloud.yandex.ru](https://yandex.cloud/ru/)
 
