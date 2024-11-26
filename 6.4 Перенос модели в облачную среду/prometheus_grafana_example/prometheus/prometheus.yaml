@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'embedder'  # Name of the job
+    scrape_interval: 5s  # Интервал опроса сервиса, переопределяет значения из global
+    metrics_path: /metrics  # Endpoint, по которому будем собирать метрики
+    static_configs:
+      - targets: ['10.130.0.15:7777']  # Список адресов, с которых будем забирать метрики
+
+# Настройка для пробрасывания метрик в Yandex Managed Service for Prometheus
+remote_write:
+  # Ссылку для подключения можно получить в созданном пространстве Managed Service for Prometheus
+- url: "https://monitoring.api.cloud.yandex.net/prometheus/workspaces/.../api/v1/write"
+  # Инструкция по созданию токена https://yandex.cloud/ru/docs/iam/operations/api-key/create
+  bearer_token: "..."
