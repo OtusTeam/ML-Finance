@@ -41,7 +41,7 @@
     cr.yandex
     ```
 
-    Обратите внимание, если работаете с докером через **sudo**, то и в логине надо использовать `... | sudo docker login ...`
+    ⚠️ Обратите внимание, если работаете с докером через **sudo**, то и в логине надо использовать `... | sudo docker login ...`
 
     Более подробная [инструкция](https://yandex.cloud/ru/docs/container-registry/operations/authentication?from=int-console-help-center-or-nav)
     
@@ -134,7 +134,7 @@
             aws_secret_access_key=<секретный_ключ>
         ```
 
-        Обратите внимание, что при работе с `GeeseFS` через `sudo` система будет смотреть не в `~/.aws/credentials`, а в `/root/.aws/credentials`
+        ⚠️ Обратите внимание, что при работе с `GeeseFS` через `sudo` система будет смотреть не в `~/.aws/credentials`, а в `/root/.aws/credentials`
 
         Монтируем наш S3 бакет к ВМ
 
