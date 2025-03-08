@@ -19,6 +19,8 @@ def compare_models(
     new_model_path: pathlib.Path,
     reports_path: pathlib.Path
     ) -> None:
+    reports_path.mkdir(parents=True, exist_ok=True)
+    
     print('Loading new model...')
     new_model = joblib.load(new_model_path)
 

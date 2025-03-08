@@ -9,10 +9,6 @@ def create_new_venv(
     requirements_file: str=None, 
     force: bool=False
     ) -> None:
-    '''
-    Функция для создания виртуального окружения проекта
-    внутри контейнера с airflow worker
-    '''
     venv_path = f'/opt/airflow/.venv_{project_name}'
 
     if pathlib.Path(venv_path).exists():
@@ -27,10 +23,9 @@ def create_new_venv(
         subprocess.run([f'{venv_path}/bin/pip', 'install', '-r', requirements_file], check=True)
 
 def delete_venv(project_name: str) -> None:
-    '''
-    Функция для удаления виртуального окружения проекта
-    внутри контейнера с airflow worker
-    '''
     venv_path = f'/opt/airflow/.venv_{project_name}'
     print(f'Cleaning up venv at {venv_path}...')
     shutil.rmtree(venv_path, ignore_errors=True)
+
+if __name__ == '__main__':
+    create_new_venv(project_name='crypto_sentiment', requirements_file='/opt/airflow/dags/scripts/requirements.txt')

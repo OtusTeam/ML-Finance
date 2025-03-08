@@ -12,6 +12,8 @@ def download_data(
     dataset_name: str, 
     output_path: pathlib.Path
     ) -> None:
+    output_path.mkdir(parents=True, exist_ok=True)
+    
     print('Donwloading data...')
     hf_dataset = load_dataset(dataset_name)
 

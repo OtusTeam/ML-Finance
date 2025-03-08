@@ -6,12 +6,12 @@ from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
 # Функции для создания и удаления venv 
-from utils import create_new_venv, delete_venv
+from my_utils.utils import create_new_venv, delete_venv
 
 
 # Переменные, используемые в пайплайне
 PROJECT_NAME = 'crypto_sentiment'
-MLFLOW_HOST = "51.250.45.46"
+MLFLOW_HOST = "130.193.58.232"
 MLFLOW_PORT = "5000"
 MLFLOW_EXPERIMENT_NAME = "crypto_sentiment"
 
@@ -32,7 +32,7 @@ def run_delete_venv_task() -> None:
 
 default_args = {
     'owner': 'airflow',
-    'start_date': datetime(2024, 12, 2, 18, 40, 00),
+    'start_date': datetime(2025, 3, 5, 18, 20, 00),
     'retries': 1,
     'execution_timeout': timedelta(minutes=20)
 }

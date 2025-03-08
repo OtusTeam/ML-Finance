@@ -22,6 +22,7 @@ def evaluate_model(
     mlflow_port: str,
     mlflow_experiment_name: str
     ) -> None:
+    reports_path.mkdir(parents=True, exist_ok=True)
 
     mlflow.set_tracking_uri(f'http://{mlflow_host}:{mlflow_port}')
     mlflow.set_experiment(mlflow_experiment_name)

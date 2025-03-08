@@ -16,6 +16,7 @@ def create_embeddings(
     target_column_name: str,
     output_path: pathlib.Path
     ) -> None:
+    output_path.mkdir(parents=True, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)

@@ -1,109 +1,90 @@
-# Можно задать переменные, которые потом передадим в команды
-# в формате ${variable_name}, либо ${variable_group.variable_name}
-vars:
-  - mlflow:
-      host: '84.201.181.38'
-      port: '5000'
-      experiment_name: 'crypto_sentiment'
-  - dataset_name: 'flowfree/crypto-news-headlines'
-  - embedder_name: 'cointegrated/LaBSE-en-ru'
-  - texts_column_name: 'text'
-  - target_column_name: 'label'
-  - model_params:
-      penalty: 'l1'
+  vars:
+    - params.yaml
 
-# Можно указать путь к файлу с метриками
-# В таком случае будут работать команды 
-# dvc metrics show и dvc metrics diff 
-metrics:
-  - reports/test_metrics.json
+  metrics:
+    - reports/test_metrics.json
 
-# Здесь описываем наш пайплайн
-stages:
-  # Имя стадии
-  download_data:
-    # Описание стадии
-    desc: 'Загружает датасет из Hugginface и сохраняет локально в csv'
-    # Команда, которая выполняется на данной стадии
-    cmd: python ./src/data/get_data.py
-                ${dataset_name}
-                ./data/raw
-    # Необходимые зависимости
-    # Стадия упадёт, если не будет этих зависимостей
-    deps:
-      - src/data/get_data.py
-    # Артефакты, полученные в результате работы стадии
-    outs:
-      - data/raw/train_dataset.csv
-      - data/raw/test_dataset.csv
-      - data/raw/validation_dataset.csv
-  
-  generate_embeddings:
-    desc: 'Генерирует эмбеддинги для текстов'
-    cmd: python ./src/features/generate_features.py
-                ${embedder_name}
-                ./data/raw
-                ${texts_column_name}
-                ./data/processed
-    deps:
-      - data/raw/train_dataset.csv
-      - data/raw/test_dataset.csv
-      - data/raw/validation_dataset.csv
-    outs:
-      - data/processed/train_dataset.csv
-      - data/processed/test_dataset.csv
-      - data/processed/validation_dataset.csv
+  stages:
+    download_data:
+      desc: 'Загружает датасет из Hugginface и сохраняет локально в csv'
+      cmd: python ./src/data/get_data.py
+                  ${dataset_name}
+                  ./data/raw
+      deps:
+        - src/data/get_data.py
+      outs:
+        - data/raw/train_dataset.csv
+        - data/raw/test_dataset.csv
+        - data/raw/validation_dataset.csv
+    
+    generate_embeddings:
+      desc: 'Генерирует эмбеддинги для текстов'
+      cmd: python ./src/features/generate_features.py
+                  ${embedder_name}
+                  ./data/raw
+                  ${texts_column_name}
+                  ./data/processed
+      deps:
+        - data/raw/train_dataset.csv
+        - data/raw/test_dataset.csv
+        - data/raw/validation_dataset.csv
+      outs:
+        - data/processed/train_dataset.csv
+        - data/processed/test_dataset.csv
+        - data/processed/validation_dataset.csv
 
-  train_model:
-    desc: 'Обучает модель'
-    cmd: python ./src/models/train.py
-                ./data/processed/train_dataset.csv
-                ${target_column_name}
-                ${model_params.penalty}
-                ./models
-                ${mlflow.host}
-                ${mlflow.port}
-                ${mlflow.experiment_name}
-                ./reports
-    deps:
-      - data/processed/train_dataset.csv
-    outs:
-      - models/crypto_sentiment_clf.joblib
-  
-  evaluate_model:
-    desc: 'Оценивает качество модели на тестовой выборке'
-    cmd: python ./src/models/evaluate.py
-                ./models/crypto_sentiment_clf.joblib
-                ./data/processed/test_dataset.csv
-                ${target_column_name}
-                ./reports
-                ${mlflow.host}
-                ${mlflow.port}
-                ${mlflow.experiment_name}
-    deps:
-      - models/crypto_sentiment_clf.joblib
-      - data/processed/test_dataset.csv
-    outs:
-      - reports/test_metrics.json
-  
-  compare_models:
-    desc: 'Сравнивает метрики старой и новой модели на валидационной выборке'
-    cmd: python ./src/models/compare.py
-                ./data/processed/validation_dataset.csv
-                ${target_column_name}
-                ./models/crypto_sentiment_clf.joblib
-                ./reports
-    deps:
-      - models/crypto_sentiment_clf.joblib
-      - data/processed/validation_dataset.csv
-    outs:
-      - reports/best_model.json
-  
-  push_to_s3:
-    desc: 'Заливает обученную модель в S3'
-    cmd: python ./src/models/push.py
-                ./models/crypto_sentiment_clf.joblib
-                ./reports
-    deps:
-      - models/crypto_sentiment_clf.joblib
-      - reports/best_model.json
+    train_model:
+      desc: 'Обучает модель'
+      cmd: python ./src/models/train.py
+                  ./data/processed/train_dataset.csv
+                  ${target_column_name}
+                  ${model_params.penalty}
+                  ./models
+                  ${mlflow.host}
+                  ${mlflow.port}
+                  ${mlflow.experiment_name}
+                  ./reports
+      params:
+        - model_params.penalty
+      deps:
+        - data/processed/train_dataset.csv
+      outs:
+        - models/crypto_sentiment_clf.joblib
+    
+    evaluate_model:
+      desc: 'Оценивает качество модели на тестовой выборке'
+      cmd: python ./src/models/evaluate.py
+                  ./models/crypto_sentiment_clf.joblib
+                  ./data/processed/test_dataset.csv
+                  ${target_column_name}
+                  ./reports
+                  ${mlflow.host}
+                  ${mlflow.port}
+                  ${mlflow.experiment_name}
+      deps:
+        - models/crypto_sentiment_clf.joblib
+        - data/processed/test_dataset.csv
+      outs:
+        - reports/test_metrics.json
+    
+    compare_models:
+      desc: 'Сравнивает метрики старой и новой модели на валидационной выборке'
+      cmd: python ./src/models/compare.py
+                  ./data/processed/validation_dataset.csv
+                  ${target_column_name}
+                  ./models/crypto_sentiment_clf.joblib
+                  ./reports
+      deps:
+        - models/crypto_sentiment_clf.joblib
+        - data/processed/validation_dataset.csv
+      outs:
+        - reports/best_model.json
+    
+    push_to_s3:
+      desc: 'Заливает обученную модел в S3'
+      cmd: python ./src/models/push.py
+                  ./models/crypto_sentiment_clf.joblib
+                  ./reports
+      deps:
+        - models/crypto_sentiment_clf.joblib
+        - reports/best_model.json
