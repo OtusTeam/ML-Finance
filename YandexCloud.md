@@ -14,7 +14,7 @@
 
 1. Создадим **Yandex Object Storage**
 
-    [Интсрукция](https://yandex.cloud/ru/docs/storage/quickstart?from=int-console-help-center-or-nav) по созданию
+    [Инструкция](https://yandex.cloud/ru/docs/storage/quickstart?from=int-console-help-center-or-nav) по созданию
 
 2. Назначим нужные нам роли для сервисного аккаунта. В нашем примере это роль `storage.admin`, но можно `storage.uploader` и `storage.viewer`.
 
@@ -229,7 +229,7 @@
       - url: "<yandex_cloud_prometheus_workspace_url>"
         bearer_token: "api_ключ_сервисного_аккаунта"
     ```
-4. Добавим **Proemetheus** и **Grafana** в `docker-compose.yaml`
+4. Добавим **Prometheus** и **Grafana** в `docker-compose.yaml`
 
 5. Запустим сервисы
 
