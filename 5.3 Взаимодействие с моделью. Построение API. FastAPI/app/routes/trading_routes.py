@@ -42,7 +42,7 @@ def stop_trading(request: Request):
     return JSONResponse({"status": "ok", "message": "Trading stopped"}, status_code=status.HTTP_200_OK)
 
 
-@router.get("/delete_accounts")
+@router.delete("/delete_accounts")
 def delete_accounts(request: Request):
     request.app.trader.close_sandbox_account()
     return JSONResponse({"status": "ok", "message": "All sandbox accounts deleted"}, status_code=status.HTTP_200_OK)
