@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
 
-@router.post("/add_funds")
+@router.put("/add_funds")
 def add_funds(request: Request, amount: int = 100_000):
     request.app.trader.add_funds(amount=amount)
     return JSONResponse({"status": "ok", "message": f"Funds added: {amount}"}, status_code=status.HTTP_200_OK)
