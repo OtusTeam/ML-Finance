@@ -1,16 +1,41 @@
 import threading
+from typing import Annotated
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Header, Request, status
 from fastapi.responses import JSONResponse
 
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
+idempotency_storage = set()
+lock = threading.Lock()
+
 
 @router.put("/add_funds")
-def add_funds(request: Request, amount: int = 100_000):
-    request.app.trader.add_funds(amount=amount)
-    return JSONResponse({"status": "ok", "message": f"Funds added: {amount}"}, status_code=status.HTTP_200_OK)
+def add_funds(
+    request: Request,
+    amount: int = 100_000,
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+):
+    if not idempotency_key:
+        return JSONResponse(
+            {"status": "error", "message": "Missing Idempotency-Key header"},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with lock:
+        if idempotency_key in idempotency_storage:
+            return JSONResponse(
+                {"status": "ok", "message": f"Duplicate request ignored (key={idempotency_key})"},
+                status_code=status.HTTP_200_OK,
+            )
+        idempotency_storage.add(idempotency_key)
+
+        request.app.trader.add_funds(amount=amount)
+        return JSONResponse(
+            {"status": "ok", "message": f"Funds added: {amount} (key={idempotency_key})"},
+            status_code=status.HTTP_200_OK,
+        )
 
 
 @router.get("/start_trading")
