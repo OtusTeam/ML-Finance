@@ -29,9 +29,10 @@ def add_funds(
                 {"status": "ok", "message": f"Duplicate request ignored (key={idempotency_key})"},
                 status_code=status.HTTP_200_OK,
             )
-        idempotency_storage.add(idempotency_key)
 
         request.app.trader.add_funds(amount=amount)
+        idempotency_storage.add(idempotency_key)
+
         return JSONResponse(
             {"status": "ok", "message": f"Funds added: {amount} (key={idempotency_key})"},
             status_code=status.HTTP_200_OK,
