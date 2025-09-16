@@ -14,18 +14,13 @@ from app.settings import LOGGER
 class LiveTrading:
     """Класс для торговли в реальном времени."""
 
-    def __init__(self, api_key: str, ticker: str, trade_amount: int) -> None:
+    def __init__(self, api_key: str) -> None:
         """Инициализация торговой стратегии.
 
         :param api_key: API ключ Т-инвестиций
-        :param ticker: Тикер инструмента, который будет торговаться
-        :param trade_amount: Кол-во лотов для заявки
         """
         self.api_key = api_key
-        self.ticker = ticker
-        self.trade_amount = trade_amount
         self.account_id = self._get_account_id()
-        self.figi = self.get_figi_by_ticker(self.ticker)
 
         self.is_running = False
         self.current_position = None
@@ -109,17 +104,19 @@ class LiveTrading:
             LOGGER.info("Все заявки отменены")
             LOGGER.info(f"Заявки: {api_client.sandbox.get_sandbox_orders(account_id=self.account_id)}")
 
-    def get_market_data(self, limit: int = 100) -> list[dict[str, typing.Any]]:
+    def get_market_data(self, ticker: str, limit: int = 100) -> list[dict[str, typing.Any]]:
         """Получение рыночных данных (свечей).
 
-        :param limit:
+        :param ticker: Тикер инструмента
+        :param limit: Кол-во свечей
         :return:
         """
+        figi = self.get_figi_by_ticker(ticker)
         with Client(self.api_key) as api_client:
             candles_list = []
             try:
                 for candle in api_client.get_all_candles(
-                    figi=self.figi,
+                    figi=figi,
                     from_=now() - timedelta(minutes=limit + 5),  # Запас для точного кол-ва
                     to=now(),
                     interval=CandleInterval.CANDLE_INTERVAL_1_MIN,
@@ -157,21 +154,23 @@ class LiveTrading:
                 LOGGER.error(f"❌ Ошибка при получении статуса аккаунта: {e}")
                 return {"balance": None, "positions": [], "open_orders": []}
 
-    def execute_trade(self, signal: str, current_price: float) -> bool:
+    def execute_trade(self, signal: str, ticker: str, trade_amount: int) -> bool:
         """Выполнение торговой операции в песочнице.
-        Используется `orders.post_order` с токеном песочницы.
 
         :param signal: Сигнал для покупки/продажи
-        :param current_price: Текущая цена инструмента
+        :param ticker: Тикер инструмента
+        :param trade_amount: Количество лотов
         :return: True, если операция исполнена; False, если операция не исполнена
         """
+        figi = self.get_figi_by_ticker(ticker)
+
         with Client(self.api_key) as api_client:
             try:
                 if signal == "BUY" and not self.current_position:
                     # Размещение рыночного ордера на покупку
                     order_response = api_client.sandbox.post_sandbox_order(
-                        figi=self.figi,
-                        quantity=self.trade_amount,
+                        figi=figi,
+                        quantity=trade_amount,
                         account_id=self.account_id,
                         direction=OrderDirection.ORDER_DIRECTION_BUY,
                         order_type=OrderType.ORDER_TYPE_MARKET,
@@ -181,7 +180,8 @@ class LiveTrading:
                     if order_response.execution_report_status == 1:  # Исполнен
                         self.current_position = "LONG"
                         LOGGER.info(
-                            f"✅ ПОКУПКА ИСПОЛНЕНА: {self.trade_amount} {self.ticker} по цене ~{current_price:.6f}"
+                            f"✅ ПОКУПКА ИСПОЛНЕНА: {trade_amount} {ticker} "
+                            f"по цене ~{quotation_to_decimal(order_response.executed_order_price):.6f}"
                         )
                         return True
                     LOGGER.error(f"❌ Ошибка выполнения покупки: {order_response.reject_reason}")
@@ -190,8 +190,8 @@ class LiveTrading:
                 if signal == "SELL" and self.current_position == "LONG":
                     # Размещение рыночного ордера на продажу
                     order_response = api_client.sandbox.post_sandbox_order(
-                        figi=self.figi,
-                        quantity=self.trade_amount,
+                        figi=figi,
+                        quantity=trade_amount,
                         account_id=self.account_id,
                         direction=OrderDirection.ORDER_DIRECTION_SELL,
                         order_type=OrderType.ORDER_TYPE_MARKET,
@@ -201,7 +201,8 @@ class LiveTrading:
                     if order_response.execution_report_status == 1:  # Исполнен
                         self.current_position = None
                         LOGGER.info(
-                            f"✅ ПРОДАЖА ИСПОЛНЕНА: {self.trade_amount} {self.ticker} по цене ~{current_price:.6f}"
+                            f"✅ ПРОДАЖА ИСПОЛНЕНА: {trade_amount} {ticker} "
+                            f"по цене ~{quotation_to_decimal(order_response.executed_order_price):.6f}"
                         )
                         return True
                     LOGGER.error(f"❌ Ошибка выполнения продажи: {order_response.reject_reason}")

@@ -1,5 +1,5 @@
 import threading
-from typing import Annotated
+import typing
 
 from fastapi import APIRouter, Header, Request, status
 from fastapi.responses import JSONResponse
@@ -13,15 +13,16 @@ lock = threading.Lock()
 
 
 class ExecuteTradeRequestBody(BaseModel):
-    signal: str
-    current_price: float
+    signal: typing.Literal["BUY", "SELL"]
+    ticker: str
+    trade_amount: int
 
 
 @router.put("/add_funds")
 async def add_funds(
     request: Request,
     amount: int = 100_000,
-    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    idempotency_key: typing.Annotated[str | None, Header(alias="Idempotency-Key")] = None,
 ) -> JSONResponse:
     if not idempotency_key:
         return JSONResponse(
@@ -46,8 +47,14 @@ async def add_funds(
 
 @router.post("/execute_trade")
 async def execute_trade(request: Request, request_body: ExecuteTradeRequestBody) -> JSONResponse:
-    request.app.trader.execute_trade(signal=request_body.signal, current_price=request_body.current_price)
-    return JSONResponse({"status": "ok", "message": "Trade executed"}, status_code=status.HTTP_200_OK)
+    is_trade_executed = request.app.trader.execute_trade(
+        signal=request_body.signal, ticker=request_body.ticker, trade_amount=request_body.trade_amount
+    )
+    if is_trade_executed:
+        return JSONResponse({"status": "ok", "message": "Trade executed"}, status_code=status.HTTP_200_OK)
+    return JSONResponse(
+        {"status": "error", "message": "Trade execution failed"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
 
 
 @router.delete("/delete_accounts")

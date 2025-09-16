@@ -18,9 +18,6 @@ class Settings(BaseSettings):
     HOST: str = pydantic.Field("0.0.0.0")
     PORT: int = pydantic.Field("7777")
 
-    TICKER: str = pydantic.Field("SBER")
-    TRADE_AMOUNT: int = pydantic.Field(1)
-
     T_SANDBOX_TOKEN: pydantic.SecretStr = pydantic.Field("")
 
     class Config:

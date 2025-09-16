@@ -12,8 +12,6 @@ def create_app() -> FastAPI:
     async def lifespan(app: FastAPI):
         app.trader = LiveTrading(
             api_key=settings.T_SANDBOX_TOKEN.get_secret_value(),
-            ticker=settings.TICKER,
-            trade_amount=settings.TRADE_AMOUNT,
         )
 
         yield
