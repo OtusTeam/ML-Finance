@@ -1,4 +1,4 @@
-from prometheus_client import Summary
+from prometheus_client import Counter, Summary
 
 
 metrics_labels = ["app_name", "app_version"]
@@ -21,5 +21,10 @@ app_metrics = {
         "signal_calculating_seconds",
         "Time spent calculating the signal",
         metrics_labels + ["model_name", "model_version"],
+    ),
+    "signals_counter": Counter(
+        "signals_counter",
+        "Counter of signals",
+        metrics_labels + ["model_name", "model_version", "signal"],
     ),
 }

@@ -76,6 +76,14 @@ class LiveTradingStrategy:
             model_version=settings.ML_MODEL_VERSION,
         ).observe(time.time() - calculating_signal_start_time)
 
+        app_metrics["signals_counter"].labels(
+            app_name=settings.APP_NAME,
+            app_version=settings.APP_VERSION,
+            model_name=settings.ML_MODEL_NAME,
+            model_version=settings.ML_MODEL_VERSION,
+            signal=signal,
+        ).inc()
+
         return {
             "signal": signal,
             "reason": reason,
