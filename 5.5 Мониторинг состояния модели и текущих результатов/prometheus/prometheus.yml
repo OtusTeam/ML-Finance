@@ -1,0 +1,11 @@
+global:
+  # Глобальные настройки. Если не указать их в jobах, то применятся из этого раздела
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'ml_trader'  # Name of the job
+    scrape_interval: 5s  # Интервал опроса сервиса, переопределяет значения из global
+    metrics_path: /metrics  # Endpoint, по которому будем собирать метрики
+    static_configs:
+      - targets: ['ml-trader:7777']  # Список адресов, с которых будем забирать метрики

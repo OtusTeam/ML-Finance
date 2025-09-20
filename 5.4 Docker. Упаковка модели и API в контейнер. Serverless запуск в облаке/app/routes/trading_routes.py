@@ -3,19 +3,14 @@ import typing
 
 from fastapi import APIRouter, Header, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+
+from app.models import ExecuteTradeRequestBody, GetMarketDataRequestBody
 
 
 router = APIRouter(prefix="/trading", tags=["Trading"])
 
 idempotency_storage = set()
 lock = threading.Lock()
-
-
-class ExecuteTradeRequestBody(BaseModel):
-    signal: typing.Literal["BUY", "SELL"]
-    ticker: str
-    trade_amount: int
 
 
 @router.put("/add_funds")
@@ -47,10 +42,10 @@ async def add_funds(
 
 @router.post("/execute_trade")
 async def execute_trade(request: Request, request_body: ExecuteTradeRequestBody) -> JSONResponse:
-    is_trade_executed = request.app.trader.execute_trade(
+    trade_execution_result = request.app.trader.execute_trade(
         signal=request_body.signal, ticker=request_body.ticker, trade_amount=request_body.trade_amount
     )
-    if is_trade_executed:
+    if trade_execution_result != -1:
         return JSONResponse({"status": "ok", "message": "Trade executed"}, status_code=status.HTTP_200_OK)
     return JSONResponse(
         {"status": "error", "message": "Trade execution failed"}, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -61,3 +56,17 @@ async def execute_trade(request: Request, request_body: ExecuteTradeRequestBody)
 async def delete_accounts(request: Request) -> JSONResponse:
     request.app.trader.close_sandbox_account()
     return JSONResponse({"status": "ok", "message": "All sandbox accounts deleted"}, status_code=status.HTTP_200_OK)
+
+
+@router.post("/get_market_data")
+async def get_market_data(request: Request, request_body: GetMarketDataRequestBody) -> JSONResponse:
+    market_data = request.app.trader.get_market_data(ticker=request_body.ticker, limit=request_body.limit)
+    if market_data[0].get("Error", False):
+        return JSONResponse(
+            {"status": "error", "message": f"Failed to fetch market data for {request_body.ticker}"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    return JSONResponse(
+        {"status": "ok", "message": f"Fetched market data for {request_body.ticker}", "market_data": market_data},
+        status_code=status.HTTP_200_OK,
+    )
