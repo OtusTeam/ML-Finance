@@ -124,10 +124,10 @@ class LiveTrading:
                     candles_list.append(
                         {
                             "time": candle.time,
-                            "open": quotation_to_decimal(candle.open),
-                            "high": quotation_to_decimal(candle.high),
-                            "low": quotation_to_decimal(candle.low),
-                            "close": quotation_to_decimal(candle.close),
+                            "open": float(quotation_to_decimal(candle.open)),
+                            "high": float(quotation_to_decimal(candle.high)),
+                            "low": float(quotation_to_decimal(candle.low)),
+                            "close": float(quotation_to_decimal(candle.close)),
                             "volume": candle.volume,
                         }
                     )
@@ -154,13 +154,13 @@ class LiveTrading:
                 LOGGER.error(f"❌ Ошибка при получении статуса аккаунта: {e}")
                 return {"balance": None, "positions": [], "open_orders": []}
 
-    def execute_trade(self, signal: str, ticker: str, trade_amount: int) -> bool:
+    def execute_trade(self, signal: str, ticker: str, trade_amount: int) -> int:
         """Выполнение торговой операции в песочнице.
 
         :param signal: Сигнал для покупки/продажи
         :param ticker: Тикер инструмента
         :param trade_amount: Количество лотов
-        :return: True, если операция исполнена; False, если операция не исполнена
+        :return: 1, если операция исполнена; 0 если операцию не надо исполнять; -1, если ошибка при исполнении операции
         """
         figi = self.get_figi_by_ticker(ticker)
 
@@ -183,9 +183,9 @@ class LiveTrading:
                             f"✅ ПОКУПКА ИСПОЛНЕНА: {trade_amount} {ticker} "
                             f"по цене ~{quotation_to_decimal(order_response.executed_order_price):.6f}"
                         )
-                        return True
+                        return 1
                     LOGGER.error(f"❌ Ошибка выполнения покупки: {order_response.reject_reason}")
-                    return False
+                    return -1
 
                 if signal == "SELL" and self.current_position == "LONG":
                     # Размещение рыночного ордера на продажу
@@ -204,12 +204,11 @@ class LiveTrading:
                             f"✅ ПРОДАЖА ИСПОЛНЕНА: {trade_amount} {ticker} "
                             f"по цене ~{quotation_to_decimal(order_response.executed_order_price):.6f}"
                         )
-                        return True
+                        return 1
                     LOGGER.error(f"❌ Ошибка выполнения продажи: {order_response.reject_reason}")
-                    return False
-
-                return False
+                    return -1
+                return 0
 
             except Exception as e:
                 LOGGER.error(f"❌ Ошибка выполнения торговой операции: {e}")
-                return False
+                return -1
