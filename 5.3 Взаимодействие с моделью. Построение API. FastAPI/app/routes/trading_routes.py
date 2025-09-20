@@ -49,7 +49,7 @@ def start_trading(request: Request):
     def run():
         request.app.trader.start_live_trading(interval_seconds=60)
 
-    if not isinstance(request.app, threading.Thread):  # request.app.trading_thread:
+    if not hasattr(request.app, "trading_thread"):
         request.app.trading_thread = threading.Thread(target=run, daemon=True)
     request.app.trading_thread.start()
     return JSONResponse({"status": "ok", "message": "Trading started"}, status_code=status.HTTP_200_OK)
