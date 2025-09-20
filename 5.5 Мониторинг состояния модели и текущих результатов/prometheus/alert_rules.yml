@@ -1,0 +1,20 @@
+groups:
+- name: general.rules
+  rules:
+  - alert: InstanceDown
+    expr: up{job="ml_trader"} == 0
+    for: 5s
+    labels:
+      severity: critical
+    annotations:
+      summary: "Сервис {{ $labels.instance }} не отвечает."
+      description: "Сервис {{ $labels.instance }} (job {{ $labels.job }}) упал."
+
+  - alert: SellSignal
+    expr: signals_counter_total{job="ml_trader", signal="SELL"} > 0
+    for: 5s
+    labels:
+      severity: low
+    annotations:
+      summary: "Сервис {{ $labels.instance }} продал бумагу."
+      description: "Сервис {{ $labels.instance }} (job {{ $labels.job }}) продал бумагу."
