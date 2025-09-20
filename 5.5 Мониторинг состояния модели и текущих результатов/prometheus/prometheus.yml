@@ -1,4 +1,5 @@
 global:
+  # Глобальные настройки. Если не указать их в jobах, то применятся из этого раздела
   scrape_interval: 5s
   evaluation_interval: 5s
 
