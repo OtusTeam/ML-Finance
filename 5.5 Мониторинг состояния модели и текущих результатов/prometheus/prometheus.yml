@@ -9,3 +9,11 @@ scrape_configs:
     metrics_path: /metrics  # Endpoint, по которому будем собирать метрики
     static_configs:
       - targets: ['ml-trader:7777']  # Список адресов, с которых будем забирать метрики
+
+rule_files:
+  - "/etc/prometheus/alert_rules.yml" # Путь к вашему файлу с правилами
+
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['alerts-container:9093']
