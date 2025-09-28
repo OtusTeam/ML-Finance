@@ -1,0 +1,156 @@
+services:
+  ml_signals:
+    restart: always
+    build: ./ml_signals/
+    environment:
+      TICKER: ${TICKER}
+      TRADE_AMOUNT: ${TRADE_AMOUNT}
+      ML_MODEL_PATH: ${ML_MODEL_PATH}
+      DEVICE: ${DEVICE}
+      ML_SIGNALS_HOST: ${ML_SIGNALS_HOST}
+      ML_SIGNALS_PORT: ${ML_SIGNALS_PORT}
+      API_TRADER_HOST: ${API_TRADER_HOST}
+      API_TRADER_PORT: ${API_TRADER_PORT}
+      MOUNTS_ROOT_PATH: ${MOUNTS_ROOT_PATH}
+    ports:
+      - "${ML_SIGNALS_PORT}:${ML_SIGNALS_PORT}"
+    depends_on:
+      - api_trader
+    networks:
+      - trading_network
+    healthcheck: # Добавляем проверку здоровья
+      test: ["CMD", "curl", "-f", "http://ml_signals:${ML_SIGNALS_PORT}/ml/healthcheck"] # если curl есть
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - $MOUNTS_ROOT_PATH/ml_signals/models:/home/python/app/models
+      - $MOUNTS_ROOT_PATH/ml_signals/logs:/home/python/app/logs
+      - $MOUNTS_ROOT_PATH/ml_signals/.venv:/home/python/app/.venv
+
+  api_trader:
+    restart: always
+    build: ./api_trader/
+    environment:
+      API_TRADER_HOST: 0.0.0.0
+      API_TRADER_PORT: ${API_TRADER_PORT}
+      T_SANDBOX_TOKEN: ${T_SANDBOX_TOKEN}
+#    ports:
+#      - "${API_TRADER_PORT}:${API_TRADER_PORT}"
+    networks:
+      - trading_network
+    healthcheck: # Добавляем проверку здоровья
+      test: [ "CMD", "curl", "-f", "http://api_trader:${API_TRADER_PORT}/trading/healthcheck" ] # если curl есть
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - $MOUNTS_ROOT_PATH/api_trader/logs:/home/python/app/logs
+
+#  api_trader_2:
+#    restart: always
+#    build: ./api_trader/
+#    environment:
+#      API_TRADER_HOST: 0.0.0.0
+#      API_TRADER_PORT: ${API_TRADER_PORT}
+#      T_SANDBOX_TOKEN: ${T_SANDBOX_TOKEN}
+#    ports:
+#      - "${API_TRADER_PORT}:${API_TRADER_PORT}"
+#    networks:
+#      - trading_network
+#    healthcheck: # Добавляем проверку здоровья
+#      test: [ "CMD", "curl", "-f", "http://api_trader_2:${API_TRADER_PORT}/trading/healthcheck" ] # если curl есть
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 40s
+#    volumes:
+#      - $MOUNTS_ROOT_PATH/api_trader/logs:/home/python/app/logs
+
+#  api_trader_3:
+#    restart: always
+#    build: ./api_trader/
+#    environment:
+#      API_TRADER_HOST: 0.0.0.0
+#      API_TRADER_PORT: ${API_TRADER_PORT}
+#      T_SANDBOX_TOKEN: ${T_SANDBOX_TOKEN}
+#    ports:
+#      - "${API_TRADER_PORT}:${API_TRADER_PORT}"
+#    networks:
+#      - trading_network
+#    healthcheck: # Добавляем проверку здоровья
+#      test: [ "CMD", "curl", "-f", "http://api_trader_3:${API_TRADER_PORT}/trading/healthcheck" ] # если curl есть
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 40s
+#    volumes:
+#      - $MOUNTS_ROOT_PATH/api_trader/logs:/home/python/app/logs
+
+  prometheus:
+    restart: always
+    image: prom/prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    networks:
+      - trading_network
+    volumes:
+      - $MOUNTS_ROOT_PATH/prometheus/prometheus_data:/prometheus
+      - $MOUNTS_ROOT_PATH/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - $MOUNTS_ROOT_PATH/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+
+  alertmanager:
+    restart: always
+    image: prom/alertmanager
+    networks:
+      - trading_network
+    depends_on:
+      - prometheus
+    ports:
+      - "${ALERTMANAGER_PORT}:${ALERTMANAGER_PORT}"
+    volumes:
+      - $MOUNTS_ROOT_PATH/alertmanager/alertmanager.yml:/config/alertmanager.yml
+    command:
+      - "--config.file=/config/alertmanager.yml"
+      - "--web.listen-address=:${ALERTMANAGER_PORT}"
+
+  grafana:
+    restart: always
+    image: grafana/grafana-oss
+    networks:
+      - trading_network
+    ports:
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
+    depends_on:
+      - prometheus
+    environment:
+      GF_SERVER_HTTP_PORT: ${GRAFANA_PORT}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_LOGIN}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - $MOUNTS_ROOT_PATH/grafana/grafana_data:/var/lib/grafana
+      - $MOUNTS_ROOT_PATH/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - $MOUNTS_ROOT_PATH/grafana/provisioning/plugins/:/var/lib/grafana/plugins
+      - $MOUNTS_ROOT_PATH/grafana/dashboards:/opt/grafana/dashboards
+
+  nginx:
+    image: nginx:1.29.1-alpine-slim
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - trading_network
+    depends_on:
+      - api_trader
+
+networks:
+  trading_network:
