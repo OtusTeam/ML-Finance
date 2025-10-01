@@ -1,9 +1,9 @@
 # Репозиторий с примером DVC и AirFlow пайплайнов, отслеживанием эксперимента в MLFlow
 
-[DVC pipeline](./pipeline/Readme.md#работа-с-dvc)
+[DVC pipeline](./pipeline/README.md#работа-с-dvc)
 
-[MLflow experiment tracking](./pipeline/Readme.md#работа-с-mlflow)
+[MLflow experiment tracking](./pipeline/README.md#работа-с-mlflow)
 
-[MLFlow docker](./mlflow_docker/)
+[MLFlow docker](./mlflow/)
 
 [AirFlow](./airflow/)
