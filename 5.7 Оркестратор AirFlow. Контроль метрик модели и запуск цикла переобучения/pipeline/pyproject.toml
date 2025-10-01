@@ -1,0 +1,85 @@
+[project]
+name = "cloud_infra"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.40.42",
+    "datasets>=4.1.1",
+    "dvc>=3.63.0",
+    "joblib>=1.5.2",
+    "mlflow>=3.4.0",
+    "pandas>=2.3.3",
+    "requests==2.32.5",
+    "scikit-learn>=1.7.2",
+    "torch>=2.8.0",
+    "transformers>=4.56.2",
+    "typer>=0.19.2",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+strict = true
+exclude = 'venv|.venv|build|dist'
+
+[tool.ruff]
+fix = true
+unsafe-fixes = true
+line-length = 120
+exclude = [
+    "*.ipynb",
+    "*.bzr",
+    "*.direnv",
+    "*.eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T201", "BLE001", "F821", "PERF", "INP001", "A001", "PLW2901", "G", "E501", "PTH", "TRY",
+    "ARG", "C", "ERA", "PLR", "DTZ", "S", "RUF", "PERF203", "ANN", "TRY401", "EM", "D205",
+    "FBT", "TRY003", "D1", "D203", "D213", "G004", "FA", "COM812", "ISC001", "RUF001"
+]
+
+[tool.ruff.lint.isort]
+no-lines-before = ["standard-library", "local-folder"]
+known-third-party = []
+known-local-folder = []
+lines-after-imports = 2
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/*.py" = ["S101", "S311"]
