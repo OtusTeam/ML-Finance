@@ -27,4 +27,9 @@ app_metrics = {
         "Counter of signals",
         metrics_labels + ["model_name", "model_version", "signal"],
     ),
+    "mae": Summary(
+        "mae",
+        "Mean Absolute Error one sample",
+        metrics_labels + ["model_name", "model_version", "signal"],
+    ),
 }

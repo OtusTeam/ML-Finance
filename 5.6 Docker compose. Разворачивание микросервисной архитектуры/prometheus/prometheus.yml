@@ -6,12 +6,14 @@ scrape_configs:
   - job_name: 'api_trader'  # Name of the job
     scrape_interval: 5s  # Интервал опроса сервиса, переопределяет значения из global
     metrics_path: /trading/metrics  # Endpoint, по которому будем собирать метрики
+    scheme: http
     static_configs:
-      - targets: ['api_trader-1:1236', 'api_trader-2:1236', 'api_trader-3:1236']  # Список адресов, с которых будем забирать метрики
+      - targets: ['api_trader:1236']  # Список адресов, с которых будем забирать метрики
 
   - job_name: 'ml_signals'  # Name of the job
     scrape_interval: 5s  # Интервал опроса сервиса, переопределяет значения из global
     metrics_path: /ml/metrics  # Endpoint, по которому будем собирать метрики
+    scheme: http
     static_configs:
       - targets: [ 'ml_signals:7777' ]  # Список адресов, с которых будем забирать метрики
 
