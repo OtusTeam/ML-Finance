@@ -76,13 +76,13 @@ class LiveTradingStrategy:
                 f"Last predicted price: {self.last_predicted_price}, "
                 f"Current price: {current_price}, "
                 f"MAE: {abs(self.last_predicted_price - current_price)}"
-                         )
+            )
             app_metrics["mae"].labels(
                 app_name=settings.APP_NAME,
                 app_version=settings.APP_VERSION,
                 model_name=settings.ML_MODEL_NAME,
                 model_version=settings.ML_MODEL_VERSION,
-                signal=signal
+                signal=signal,
             ).observe(abs(self.last_predicted_price - current_price))
 
         self.last_predicted_price = predicted_price
