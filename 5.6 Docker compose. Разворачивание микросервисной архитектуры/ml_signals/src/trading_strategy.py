@@ -30,6 +30,8 @@ class LiveTradingStrategy:
         self.current_position = None
         self.last_signal = None
 
+        self.last_predicted_price = -1.0
+
     def calculate_signals(self, data: pd.DataFrame) -> dict[str, typing.Any]:
         """Расчет торговых сигналов с помощью ML-модели.
         Эту функцию нужно адаптировать под вашу модель.
@@ -68,6 +70,22 @@ class LiveTradingStrategy:
         elif current_price > predicted_price:
             signal = "SELL"
             reason = "Текущая цена выше предсказанной"
+        if self.last_predicted_price > 0:
+            LOGGER.debug(
+                f"Writing MAE metric: "
+                f"Last predicted price: {self.last_predicted_price}, "
+                f"Current price: {current_price}, "
+                f"MAE: {abs(self.last_predicted_price - current_price)}"
+                         )
+            app_metrics["mae"].labels(
+                app_name=settings.APP_NAME,
+                app_version=settings.APP_VERSION,
+                model_name=settings.ML_MODEL_NAME,
+                model_version=settings.ML_MODEL_VERSION,
+                signal=signal
+            ).observe(abs(self.last_predicted_price - current_price))
+
+        self.last_predicted_price = predicted_price
 
         app_metrics["calculating_signal_time"].labels(
             app_name=settings.APP_NAME,
