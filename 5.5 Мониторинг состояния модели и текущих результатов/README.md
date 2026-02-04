@@ -25,19 +25,41 @@ docker network create monitoring-net
 ```
 
 #### Запустить `Trading bot` в виртуальной сети
-Собираем образ
+Перейти в [папку проекта](../5.4%20Docker.%20Упаковка%20модели%20и%20API%20в%20контейнер.%20Serverless%20запуск%20в%20облаке/) и собрать образ
 ```bash
-docker build -t moex-api .
+docker build -t trader .
 ```
-Запускаем
+
+Запустить контейнер
 ```bash
 docker run \
-    --name moex-api \
+    --name trader \
     --network monitoring-net \
     -p 1236:1236 \
+    -v <локальный путь к папке с логами>/logs:/home/python/app/logs \
     --env-file <локальный путь к env файлу>.env \
-    moex_api
- ```
+    trader
+```
+
+#### Запустить `ML signals analysis` в виртуальной сети
+Перейти в [папку проекта](../5.5%20Мониторинг%20состояния%20модели%20и%20текущих%20результатов/) и собрать образ
+```bash
+docker build -t ml-signals .
+```
+
+Запустить контейнер
+```bash
+docker run \
+    --name ml-signals \
+    --network monitoring-net \
+    -p 7777:7777 \
+    -v <локальный путь к папке с моделями>/chronos-t5-tiny/:/home/python/app/models/chronos-t5-tiny \
+    -v <локальный путь к папке с логами>/logs:/home/python/app/logs \
+    --env-file <локальный путь к env файлу>.env \
+    ml-signals
+```
+
+Инструкции по запуску остальных сервисов см. в Readme в соответствующих папках
 
 ## Код-стайл
 
