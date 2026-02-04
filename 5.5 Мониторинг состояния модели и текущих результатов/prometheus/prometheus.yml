@@ -4,11 +4,11 @@ global:
   evaluation_interval: 5s
 
 scrape_configs:
-  - job_name: 'ml_trader'  # Name of the job
+  - job_name: 'ml_signals'  # Name of the job
     scrape_interval: 5s  # Интервал опроса сервиса, переопределяет значения из global
     metrics_path: /metrics  # Endpoint, по которому будем собирать метрики
     static_configs:
-      - targets: ['ml-trader:7777']  # Список адресов, с которых будем забирать метрики
+      - targets: ['ml-signals:7777']  # Список адресов, с которых будем забирать метрики
 
 rule_files:
   - "/etc/prometheus/alert_rules.yml" # Путь к вашему файлу с правилами

@@ -16,9 +16,9 @@ receivers:
     chat_id: <ID чата, в который бот будет присылать уведомления>
     message: |
       {{ range .Alerts }}
-      **Alert:** {{ .Annotations.summary }}
-      **Instance:** {{ .Labels.instance }}
-      **Severity:** {{ .Labels.severity }}
-      **Details:**
+      <b>Alert:</b> {{ .Annotations.summary }}
+      <b>Instance:</b> {{ .Labels.instance }}
+      <b>Severity:</b> {{ .Labels.severity }}
+      <b>Details:</b>
       {{ .Annotations.description }}
       {{ end }}

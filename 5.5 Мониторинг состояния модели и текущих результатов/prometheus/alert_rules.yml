@@ -2,7 +2,7 @@ groups:
 - name: general.rules
   rules:
   - alert: InstanceDown
-    expr: up{job="ml_trader"} == 0
+    expr: up{job="ml_signals"} == 0
     for: 5s
     labels:
       severity: critical
@@ -11,10 +11,19 @@ groups:
       description: "Сервис {{ $labels.instance }} (job {{ $labels.job }}) упал."
 
   - alert: SellSignal
-    expr: signals_counter_total{job="ml_trader", signal="SELL"} > 0
+    expr: signals_counter_total{job="ml_signals", signal="SELL"} > 0
     for: 5s
     labels:
       severity: low
     annotations:
       summary: "Сервис {{ $labels.instance }} продал бумагу."
       description: "Сервис {{ $labels.instance }} (job {{ $labels.job }}) продал бумагу."
+
+  - alert: BuySignal
+    expr: signals_counter_total{job="ml_signals", signal="BUY"} > 0
+    for: 5s
+    labels:
+      severity: low
+    annotations:
+      summary: "Сервис {{ $labels.instance }} купил бумагу."
+      description: "Сервис {{ $labels.instance }} (job {{ $labels.job }}) купил бумагу."
