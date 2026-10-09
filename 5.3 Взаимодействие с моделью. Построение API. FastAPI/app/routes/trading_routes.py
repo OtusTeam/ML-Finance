@@ -1,5 +1,5 @@
 import threading
-from typing import Annotated
+import typing
 
 from fastapi import APIRouter, Header, Request, status
 from fastapi.responses import JSONResponse
@@ -15,7 +15,7 @@ lock = threading.Lock()
 def add_funds(
     request: Request,
     amount: int = 100_000,
-    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key")] = None,
+    idempotency_key: typing.Annotated[str | None, Header(alias="Idempotency-Key")] = None,
 ):
     if not idempotency_key:
         return JSONResponse(
@@ -64,7 +64,7 @@ def stop_trading(request: Request):
 
     request.app.trader.is_running = False
     request.app.trading_thread.join()
-    request.app.trading_thread = None
+    delattr(request.app, "trading_thread")
     return JSONResponse({"status": "ok", "message": "Trading stopped"}, status_code=status.HTTP_200_OK)
 
 

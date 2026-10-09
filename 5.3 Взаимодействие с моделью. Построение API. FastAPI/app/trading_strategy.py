@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import torch
 from chronos import ChronosPipeline
-from tinkoff.invest import CandleInterval, Client, InstrumentStatus, MoneyValue, OrderDirection, OrderType
-from tinkoff.invest.typedefs import AccountId
-from tinkoff.invest.utils import decimal_to_quotation, now, quotation_to_decimal
+from t_tech.invest import CandleInterval, Client, InstrumentStatus, MoneyValue, OrderDirection, OrderType
+from t_tech.invest.typedefs import AccountId
+from t_tech.invest.utils import decimal_to_quotation, now, quotation_to_decimal
 
 from app.settings import LOGGER
 
