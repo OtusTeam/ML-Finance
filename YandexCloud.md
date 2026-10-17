@@ -26,55 +26,55 @@
 
 ## Работа с контейнерами
 
-1. Создадим **Yandex Container Registry**
+1. Создадим **Yandex Cloud Registry**
 
-    [Инструкция](https://yandex.cloud/ru/docs/container-registry/quickstart/?from=int-console-help-center-or-nav) по созданию
+    [Инструкция](https://yandex.cloud/ru/docs/cloud-registry/quickstart/docker) по созданию
 
-2. Запушим в **Container Registry** наш docker image
+2. Запушим в **Cloud Registry** наш docker image
 
-    2.1. Получим наш OAuth-токен и залогинимся в **Container Registry** 
+    2.1. Создадим API ключ ([инструкция](https://yandex.cloud/ru/docs/cloud-registry/operations/docker/authentication#api-key_1)) для сервисного аккаунта и залогинимся в **Container Registry** 
 
     ```shell
-    echo <OAuth-токен> | docker login \
-    --username oauth \
+    echo <API-ключ> | docker login \
+    --username api_key \
     --password-stdin \
-    cr.yandex
+    registry.yandexcloud.net
     ```
 
     ⚠️ Обратите внимание, если работаете с докером через **sudo**, то и в логине надо использовать `... | sudo docker login ...`
 
-    Более подробная [инструкция](https://yandex.cloud/ru/docs/container-registry/operations/authentication?from=int-console-help-center-or-nav)
+    Более подробная [инструкция](https://yandex.cloud/ru/docs/cloud-registry/operations/docker/authentication)
     
-    2.2. Для загрузки в **Yandex Container Registry** образу необходимо присвоить тег в формате `cr.yandex/<идентификатор_реестра>/<имя_Docker-образа>:<тег>`
+    2.2. Для загрузки в **Yandex Cloud Registry** образу необходимо присвоить тег в формате `registry.yandexcloud.net/<идентификатор_реестра>/<имя_Docker-образа>:<тег>`
 
     Создаём свой образ
     ```shell
-    docker build -t cr.yandex/<идентификатор_реестра>/<имя_Docker-образа>:<тег>
+    docker build -t registry.yandexcloud.net/<идентификатор_реестра>/<имя_Docker-образа>:<тег>
 
     # Например
-    docker build -t cr.yandex/crpffeshm5v5qg8m4rti/my_image:latest
+    docker build -t registry.yandexcloud.net/crpffeshm5v5qg8m4rti/my_image:latest
     ```
 
     Либо меняем тег у готового
     ```shell
-    docker tag <тег_исходного образа> cr.yandex/<идентификатор_реестра>/<имя_Docker-образа>:<тег>
+    docker tag <тег_исходного образа> registry.yandexcloud.net/<идентификатор_реестра>/<имя_Docker-образа>:<тег>
     
     # Например
-    docker tag hello-world:latest cr.yandex/crpffeshm5v5qg8m4rti/hello-world:latest
+    docker tag hello-world:latest registry.yandexcloud.net/crpffeshm5v5qg8m4rti/hello-world:latest
     ```
 
-    2.3. Отправляем образ в **Container Registry**
+    2.3. Отправляем образ в **Cloud Registry**
 
     ```shell
     docker push <имя_образа>
 
     # Например
-    docker push cr.yandex/crpffeshm5v5qg8m4rti/hello-world:latest
+    docker push registry.yandexcloud.net/crpffeshm5v5qg8m4rti/hello-world:latest
     ```
 
-    Теперь можно зайти в **Yandex Container Registry** в консоли и увидеть наш образ
+    Теперь можно зайти в **Yandex Cloud Registry** в консоли и увидеть наш образ
 
-    Более подробные инструкции по [созданию](https://yandex.cloud/ru/docs/container-registry/operations/docker-image/docker-image-create) и [загрузке](https://yandex.cloud/ru/docs/container-registry/operations/docker-image/docker-image-push) образов
+    Более подробные инструкции по [созданию и загрузке](https://yandex.cloud/ru/docs/cloud-registry/quickstart/docker#create-and-push) образов
 
 3. Загруженный образ можно развернуть несколькими способами: Kubernetes, serverless container, контейнер на виртуальной машине. 
 
@@ -166,7 +166,7 @@
 
         Более подробная [инструкция](https://yandex.cloud/ru/docs/storage/tools/geesefs) по `GeeseFS` и другим утилитам
 
-    6. Логинимся в **Container Registry** (см. п. 2.1)
+    6. Логинимся в **Cloud Registry** (см. п. 2.1)
 
     7. Скачиваем наш образ
 
@@ -174,7 +174,7 @@
         docker pull <имя_образа>
 
         # Например
-        docker pull cr.yandex/crpffeshm5v5qg8m4rti/hello-world:latest
+        docker pull registry.yandexcloud.net/crpffeshm5v5qg8m4rti/hello-world:latest
         ```
     
     8. Запускаем контейнер с необходимыми настройками
@@ -183,7 +183,7 @@
         docker run <имя_образа>
         
         # Например
-        docker run cr.yandex/crpffeshm5v5qg8m4rti/hello-world:latest
+        docker run registry.yandexcloud.net/crpffeshm5v5qg8m4rti/hello-world:latest
         ```
 
         Более подробная [инструкция](https://yandex.cloud/ru/docs/container-registry/tutorials/run-docker-on-vm/console)
