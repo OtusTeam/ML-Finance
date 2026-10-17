@@ -11,9 +11,18 @@ dependencies = [
     "pydantic",
     "pydantic-settings",
     "ruff",
-    "tinkoff-investments",
+    "t-tech-investments",
     "uvicorn",
 ]
+
+# https://www.tbank.ru/invest/social/profile/T_InvestAPI/f1923306-7574-4360-9757-6b3a0013318c/?author=profile
+# Временно отключаем репозиторий Т-Банка - будем качать библиотеку из зеркала на GitHub
+#[[tool.uv.index]]
+#name = "tbank"
+#url = "https://opensource.tbank.ru/api/v4/projects/238/packages/pypi/simple"
+#
+#[tool.uv]
+#allow-insecure-host = ["opensource.tbank.ru"]
 
 [tool.mypy]
 python_version = "3.13"
@@ -76,3 +85,6 @@ lines-after-imports = 2
 
 [tool.uv.sources]
 chronos-forecasting = { git = "https://github.com/amazon-science/chronos-forecasting.git" }
+# Добавляем библиотеку напрямую из зеркала с GitHub
+# Когда заработает репозиторий Т-Банка строчку ниже можно удалить
+t-tech-investments = { git = "https://github.com/Invest-SDK/invest-python.git" }
