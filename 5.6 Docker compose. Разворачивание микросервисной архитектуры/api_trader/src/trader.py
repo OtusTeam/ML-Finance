@@ -4,9 +4,9 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pandas as pd
-from tinkoff.invest import CandleInterval, Client, InstrumentStatus, MoneyValue, OrderDirection, OrderType
-from tinkoff.invest.typedefs import AccountId
-from tinkoff.invest.utils import decimal_to_quotation, now, quotation_to_decimal
+from t_tech.invest import CandleInterval, Client, InstrumentStatus, MoneyValue, OrderDirection, OrderType
+from t_tech.invest.typedefs import AccountId
+from t_tech.invest.utils import decimal_to_quotation, now, quotation_to_decimal
 
 from src.settings import LOGGER
 
