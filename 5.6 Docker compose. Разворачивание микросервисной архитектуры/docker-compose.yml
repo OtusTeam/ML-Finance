@@ -27,7 +27,6 @@ services:
     volumes:
       - $MOUNTS_ROOT_PATH/ml_signals/models:/home/python/app/models
       - $MOUNTS_ROOT_PATH/ml_signals/logs:/home/python/app/logs
-      - $MOUNTS_ROOT_PATH/ml_signals/.venv:/home/python/app/.venv
 
   api_trader:
     restart: always
@@ -36,8 +35,8 @@ services:
       API_TRADER_HOST: 0.0.0.0
       API_TRADER_PORT: ${API_TRADER_PORT}
       T_SANDBOX_TOKEN: ${T_SANDBOX_TOKEN}
-#    ports:
-#      - "${API_TRADER_PORT}:${API_TRADER_PORT}"
+    ports:
+      - "${API_TRADER_PORT}:${API_TRADER_PORT}"
     networks:
       - trading_network
     healthcheck: # Добавляем проверку здоровья
