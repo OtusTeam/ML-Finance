@@ -1,10 +1,12 @@
 FROM python:3.13
 
+# Копируем бинарники uv из официального образа
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Обновляем систему, создаём пользователя и группу
 RUN set -ex \
     && apt update \
     && apt install \
-    && pip install uv \
     && apt --yes autoremove \
     && apt --yes clean \
     && groupadd -g 1001 python \
