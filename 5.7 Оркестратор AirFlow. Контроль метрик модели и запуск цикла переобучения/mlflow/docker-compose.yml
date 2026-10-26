@@ -2,7 +2,7 @@ services:
   # S3 для хранения артефактов в MLFlow
   s3_storage:
     restart: always
-    image: quay.io/minio/minio:RELEASE.2024-11-07T00-52-20Z
+    image: pgsty/minio
     container_name: s3_storage
     hostname: s3-storage
     environment:
@@ -22,17 +22,17 @@ services:
 
   # данный сервис создаёт бакеты в автоматическом режиме
   create_buckets:
-    image: minio/mc:RELEASE.2024-11-17T19-35-25Z
+    image: pgsty/mc
     depends_on:
       s3_storage:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      /usr/bin/mc config host add myminio http://s3-storage:9000 $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY;
-      /usr/bin/mc mb myminio/$DVC_S3_BUCKET;
-      /usr/bin/mc mb myminio/$MLFLOW_S3_BUCKET;
-      /usr/bin/mc policy download myminio/$DVC_S3_BUCKET;
-      /usr/bin/mc policy download myminio/$MLFLOW_S3_BUCKET;
+      /usr/bin/mc alias set myminio http://s3-storage:9000 $AWS_ACCESS_KEY_ID $AWS_SECRET_ACCESS_KEY;
+      /usr/bin/mc mb --ignore-existing myminio/$DVC_S3_BUCKET;
+      /usr/bin/mc mb --ignore-existing myminio/$MLFLOW_S3_BUCKET;
+      /usr/bin/mc anonymous set download myminio/$DVC_S3_BUCKET;
+      /usr/bin/mc anonymous set download myminio/$MLFLOW_S3_BUCKET;
       exit 0;
       "
 
@@ -71,4 +71,4 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB_NAME} --serve-artifacts --artifacts-destination s3://${MLFLOW_S3_BUCKET}/ --host 0.0.0.0 --allowed-hosts "*"
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB_NAME} --serve-artifacts --artifacts-destination s3://${MLFLOW_S3_BUCKET}/ --host 0.0.0.0 --allowed-hosts "*" --cors-allowed-origins "*"
